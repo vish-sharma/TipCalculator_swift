@@ -8,7 +8,7 @@
 
 import UIKit
 
-class TipCalcViewController: UIViewController, UITextFieldDelegate {
+class TipCalcViewController: UIViewController, UITextFieldDelegate,RateSegmentValueDelegate {
     @IBOutlet weak var amntTextField: UITextField!
     @IBOutlet weak var rateSegmentBar: UISegmentedControl!
     @IBOutlet weak var tipCalculationView: UIView!
@@ -39,20 +39,22 @@ class TipCalcViewController: UIViewController, UITextFieldDelegate {
     }
     
     func changeSettings(sender: UIBarButtonItem) {
-        
+        let settingVC = self.storyboard?.instantiateViewControllerWithIdentifier("TipCalcSettingsViewController") as? TipCalcSettingsViewController
+        settingVC?.delegate = self
+        settingVC?.rateIndex = self.rateSegmentBar.selectedSegmentIndex;
+        self.navigationController?.pushViewController(settingVC!, animated: true)
     }
     
     func tipCalculation(textVal: String, percent: String) {
-        
-        let percentVal = (Float(percent)!/100)*Float(textVal)!
-        print(percentVal)
-        
-        self.tipPercentageAmount.text = String(format: "%.2f",Float(percentVal))
+        if(textVal.characters.count > 0) {
+            let percentVal = (Float(percent)!/100)*Float(textVal)!
+            
+            self.tipPercentageAmount.text = String(format: "%.2f",Float(percentVal))
 
-        
-        let total = Float(textVal)!+percentVal
-        self.totalAmount.text = String(format: "%.2f",Float(total))
-        
+            
+            let total = Float(textVal)!+percentVal
+            self.totalAmount.text = String(format: "%.2f",Float(total))
+        }
     }
 
     func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
@@ -73,11 +75,19 @@ class TipCalcViewController: UIViewController, UITextFieldDelegate {
         let tempTitle:String = title.substringToIndex(index)
         [self .tipCalculation(self.amount, percent:tempTitle)]
         return true
-        
     }
 
     @IBAction func rateSegmentValueChange(sender: AnyObject) {
         
+        let title: String = self.rateSegmentBar.titleForSegmentAtIndex(self.rateSegmentBar.selectedSegmentIndex)!
+        let index: String.Index = title.startIndex.advancedBy(2)
+        let tempTitle:String = title.substringToIndex(index)
+        [self .tipCalculation(self.amount, percent:tempTitle)]
+    }
+    
+    //Mark: Delegate Method
+    func rateSettingsValueChange(index: Int){
+        self.rateSegmentBar.selectedSegmentIndex = index
         let title: String = self.rateSegmentBar.titleForSegmentAtIndex(self.rateSegmentBar.selectedSegmentIndex)!
         let index: String.Index = title.startIndex.advancedBy(2)
         let tempTitle:String = title.substringToIndex(index)
